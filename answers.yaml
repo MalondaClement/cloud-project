@@ -1,0 +1,33 @@
+answers:
+- Q.1: Quel est l'identifiant (champ id) de votre projet ?
+  Réponse: aea9f58513c8469db739272f667a3cc4
+
+- Q.2: À combien s'élève le quota maximum en vCPUs de votre projet ?
+  Réponse: 8
+
+- Q.3: Quel est le nom du service responsable de la gestion du réseau ?
+  Réponse: Neutron
+
+- Q.4: Quelle est l'adresse IP de la passerelle dans le sous-réseau private-subnet ?
+  Réponse: 10.0.0.1
+
+- Q.5: L'instance web-server-1 peut-elle accéder à internet ?
+  Réponse: non
+
+- Q.6: Est-il possible d?ajouter de nouveaux volumes et de nouvelles interfaces à une instance ?
+  Réponse: oui
+
+- Q.7: Le port 80 de l'instance web-server-1 est-il accessible sans modifications ?
+  Réponse: non
+
+- Q.8: Une règle de sécurité ingress permet-elle un filtrage sur la destination ?
+  Réponse: non
+
+- Q.9: Assigner plusieurs groupes de sécurité à une instance peut résulter en un conflit de règles ? Donnez la raison.
+  Réponse: non, car les règles sont construit de tel sorte que l'on ajoute des règles pour permettre l'accès à un port (80 par exemple) mais il n'y a pas de règle qui interdit l'accès à un port. On ne peut donc pas se retrouver dans une situation un port est autorisé par une règle et interdit par une autre.
+
+- Q.10: Quel est le nom du service responsable des zones et des enregistrements DNS ?
+  Réponse: Designate
+
+- Q.Bonus: Quelle méthode permet la configuration de TLS sur un Load Balancer ?
+  Réponse:
