@@ -1,0 +1,14 @@
+clouds:
+  openstack:
+    auth:
+      auth_url: https://fr-gnv.console.sand6.dip-tcs.local:13000
+      username:
+      password:
+      project_name:
+      user_domain_name: UPEC
+      project_domain_name: UPEC
+    region_name: regionOne
+    interface: public
+    verify: False
+    identity_api_version: '3'
+    volume_api_version: '3'
