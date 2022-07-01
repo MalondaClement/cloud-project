@@ -72,11 +72,66 @@ resource "openstack_compute_instance_v2" "bastion" {
 }
 
 # float ip for bastion
-resource "openstack_networking_floatingip_v2" "floatip_bastion" {
+resource "openstack_networking_floatingip_v2" "floatip-bastion" {
   pool = "external-net"
 }
 
 resource "openstack_compute_floatingip_associate_v2" "floatip_bastion" {
-  floating_ip = "${openstack_networking_floatingip_v2.floatip_bastion.address}"
+  floating_ip = "${openstack_networking_floatingip_v2.floatip-bastion.address}"
   instance_id = "${openstack_compute_instance_v2.bastion.id}"
+}
+
+# ssh security group for web-server
+resource "openstack_networking_secgroup_v2" "allow-ssh-web-server" {
+  name = "allow-ssh-web-server"
+  description = "allow ssh for web servers but only from bastion"
+}
+
+# ssh rule for web server (only from bastion)
+resource "openstack_networking_secgroup_rule_v2" "allow-ssh-web-server-rule1" {
+  direction = "ingress"
+  ethertype = "IPv4"
+  protocol = "tcp"
+  port_range_min = 22
+  port_range_max = 22
+  remote_ip_prefix = "${openstack_compute_instance_v2.bastion.access_ip_v4}"
+  security_group_id = "${openstack_networking_secgroup_v2.allow-ssh-web-server.id}"
+}
+
+# create web server cluster
+resource "openstack_compute_instance_v2" "web-server" {
+    count = var.nb-web-server
+    name = "web-server-${count.index}"
+    image_name = "Debian-11-GenericCloud-20220502-997"
+    flavor_name = "m1.tiny"
+    key_pair = "${var.paire-ssh}"
+    security_groups = ["default", openstack_networking_secgroup_v2.allow-ssh-web-server.name]
+    network {
+      name = openstack_networking_network_v2.private-net.name
+    }
+    user_data = "${file("web-server-init.sh")}"
+}
+
+# create a container
+resource "openstack_objectstorage_container_v1" "web-servers-container" {
+  name = "web-servers-container"
+}
+
+# add index.html to the container
+resource "openstack_objectstorage_object_v1" "doc-1" {
+  name = "index.html"
+  container_name = "${openstack_objectstorage_container_v1.web-servers-container.name}"
+  source = "index.html"
+}
+
+# add style.css to the container
+resource "openstack_objectstorage_object_v1" "doc-2" {
+  name = "style.css"
+  container_name = "${openstack_objectstorage_container_v1.web-servers-container.name}"
+  source = "style.css"
+}
+
+# float ip for load balancer
+resource "openstack_networking_floatingip_v2" "floatip-load-balancer" {
+  pool = "external-net"
 }
