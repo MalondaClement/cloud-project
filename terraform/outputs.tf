@@ -17,3 +17,15 @@ output "web-server-ip" {
 output "load-balancer-ip" {
   value = openstack_networking_floatingip_v2.floatip-load-balancer.address
 }
+
+output "load-balancer-internal-ip" {
+  value = openstack_lb_loadbalancer_v2.load-balancer.vip_address
+}
+
+output "bastion-dns" {
+  value = openstack_dns_recordset_v2.bastion_record.name
+}
+
+output "lb-dns" {
+  value = openstack_dns_recordset_v2.lb_record.name
+}
