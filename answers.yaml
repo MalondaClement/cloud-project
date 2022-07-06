@@ -31,3 +31,5 @@ answers:
 
 - Q.Bonus: Quelle méthode permet la configuration de TLS sur un Load Balancer ?
   Réponse:
+
+- Projet: L'objectif du projet était de mettre en place une petite infrastructure cloud avec les éléments suivant. Un bastion qui permet à un admin de se connecter depuis l'extérieur en ssh pour accéder aux différentes machines qui sont utilisées pour le serveur web. En effet celle-ci doivent se limiter à une visibilité depuis le réseau privé (adresse ip en 10.0.0.0) que ce soit pour la connection ssh et http. En effet, au niveau de l'accès web, seul le Load Balancer est visible depuis l'extérieur. Ma difficulté s'est portée sur le fait que lorsque j'ai souhaité géré la limitation des adresses ip autorisées dans le groupe de sécurité http des trois serveurs web. Je me suis rendu compte que l'IP utilisé par le Load Balancer lorsqu'il accède aux différents serveurs web n'est pas celle assigné par le réseau privé. Une fois la liste d'IP élargie (10.0.0.0/32 au lieu de se limiter à l'IP du Load Balancer plus de soucis).
