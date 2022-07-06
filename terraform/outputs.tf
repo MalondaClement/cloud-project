@@ -1,10 +1,18 @@
-#data "openstack_identity_auth_scope_v3" "info" {
-#  name = "info"
-#}
+################
+#### OUPUTS ####
+################
 
-#output "user" {
-#  value = "Connected with ${data.openstack_identity_auth_scope_v3.info.user_name}"
-#}
+data "openstack_identity_auth_scope_v3" "info" {
+ name = "info"
+}
+
+output "user" {
+ value = "Connected with ${data.openstack_identity_auth_scope_v3.info.user_name}"
+}
+
+##############################################
+#### Outputs with all IPs and DNS records ####
+##############################################
 
 output "bastion-ip" {
   value = openstack_networking_floatingip_v2.floatip-bastion.address
