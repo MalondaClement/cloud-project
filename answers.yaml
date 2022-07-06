@@ -32,4 +32,20 @@ answers:
 - Q.Bonus: Quelle méthode permet la configuration de TLS sur un Load Balancer ?
   Réponse:
 
-- Projet: L'objectif du projet était de mettre en place une petite infrastructure cloud avec les éléments suivant. Un bastion qui permet à un admin de se connecter depuis l'extérieur en ssh pour accéder aux différentes machines qui sont utilisées pour le serveur web. En effet celle-ci doivent se limiter à une visibilité depuis le réseau privé (adresse ip en 10.0.0.0) que ce soit pour la connection ssh et http. En effet, au niveau de l'accès web, seul le Load Balancer est visible depuis l'extérieur. Ma difficulté s'est portée sur le fait que lorsque j'ai souhaité géré la limitation des adresses ip autorisées dans le groupe de sécurité http des trois serveurs web. Je me suis rendu compte que l'IP utilisé par le Load Balancer lorsqu'il accède aux différents serveurs web n'est pas celle assigné par le réseau privé. Une fois la liste d'IP élargie (10.0.0.0/32 au lieu de se limiter à l'IP du Load Balancer plus de soucis).
+- Projet:
+    L'objectif du projet était de mettre en place une petite infrastructure cloud avec les éléments suivant.
+
+    Un bastion qui permet à un admin de se connecter depuis l'extérieur en ssh pour accéder aux différentes machines du web server et qui ne sont pas accessible depuis l'extérieur. La visibilité de celles-ci doit se limiter à une visibilité depuis le réseau privé (adresse ip en 10.0.0.0) que ce soit pour la connection ssh et http.
+
+    L'un de mes première interrogation a été de savoir comment installer nginx sur chaque machine sans avoir à s'y connecter et à le réaliser manuellement. Après quelques recherches, je me suis rendu compte qu'il était possible d'utiliser l'un des arguments de openstack_compute_instance_v2 pour indiquer un fichier bash à exécuter au lancement de l'instance. J'ai donc utilisé ce paramètre user_data pour passer le script web-server-init.sh ( user_data = "${file("web-server-init.sh")}" )
+
+    L'un de mes difficultés s'est posé lors de création du load balancer car je ne savais pas à quel réseau il devait être rataché, je pensais dans un premier temps que cette attache devait se faire dans le réseau externe mais en réalité il devait être attaché au réseau privé dans lequel se trouve les web server. Le seul lien avec l'extérieur (external-net) pour le load balancer se fait lors de l'ajout de l'IP flottante allouée dans le réseau externe.
+
+    Une nouvelle difficulté s'est posé lorsque j'ai souhaité ajouter le groupe de sécurité sur pour autorisé le port 80 en HTTP sur les trois web servers qui devait se limiter à autoriser le HTTP venant uniquement du load balancer. Dans un premier temps j'ai voulu m'inspirer du groupe de sécurité permettant la connection ssh sur le web servers uniquement depuis le bastion en utilisant directement l'IP allouée au load balancer dans le réseau privé. Cependant contrairement à ce que j'attendais l'IP utilisé par le load balancer pour faire la requête vers un web server n'est pas celle qui lui est attribué dans le réseau. Si le load balancer à par exemple une IP privée 10.0.0.89, celle utilisée vers le server web peut par exemple être 10.0.0.67. Il n'existe pourtant aucune méthode pour connaitre cette IP et j'ai regardé dans le fichier de log de NGINX pour voir cette différence d'IP. La règle pour le port 80 des web servers ne se limite dont pas à l'IP du load balancer mais à l'ensemble des IP du réseau privé (10.0.0.0/24).
+
+    Ma dernière difficulté se porte sur la création d'un snapshot de l'une ders instance web server. J'ai, en effet, réussi à créer un volume et à l'attacher avec une de mes instance web server mais je n'arrive pas à comprendre comment créer le snapshot (openstack_backstorage_snapshot_v3). J'arrive à créer une image depuis l'interface mais pas en utilisant Terraform.
+
+    Liste des fichiers :
+        versions.tf, main.tf, outputs.tf et variables.tf
+        web-server-init.sh est utilisé pour mettre à jour les packages des instances web servers mais également installer et démarrer le serveur nginx
+        index.html et style.css sont deux fichiers exemples qui sont ajouté dans le container.
